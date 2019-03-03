@@ -348,20 +348,6 @@ function build_binaries() {
 
     export PATH=${PREBUILTS_BIN}:${PATH}
 
-    if [[ ! -f ${PREBUILTS_BIN}/axel ]]; then
-        AXEL=${ROOT}/sources/axel
-        [[ ! -d ${AXEL} ]] && git -C "$(dirname "${AXEL}")" clone --depth=1 https://github.com/axel-download-accelerator/axel
-        git -C "${AXEL}" clean -fxdq
-        git -C "${AXEL}" pull
-        (
-            cd "${AXEL}" || die "Issue with cloning axel source!"
-            ./autogen.sh
-            ./configure --prefix="$(dirname "${PREBUILTS_BIN}")"
-            make ${JOBS} || die "Error building axel!"
-            make ${JOBS} install || die "Error installing axel!"
-        )
-    fi
-
     if [[ ! -f ${PREBUILTS_BIN}/pigz ]]; then
         PIGZ=${ROOT}/sources/pigz
         [[ ! -d ${PIGZ} ]] && git -C "$(dirname "${PIGZ}")" clone --depth=1 https://github.com/madler/pigz
@@ -417,12 +403,12 @@ function download_sources() {
 
     if [[ ! -f ${GMP}.tar.lz ]]; then
         header "DOWNLOADING GMP"
-        axel https://gmplib.org/download/snapshot/"${GMP}".tar.lz
+        ${DOWNLOADER} https://gmplib.org/download/snapshot/"${GMP}".tar.lz
     fi
 
     if [[ ! -f linux-${LINUX}.tar.xz ]]; then
         header "DOWNLOADING LINUX KERNEL"
-        axel https://cdn.kernel.org/pub/linux/kernel/v${LINUX/.*}.x/linux-${LINUX}.tar.xz
+        ${DOWNLOADER} https://cdn.kernel.org/pub/linux/kernel/v${LINUX/.*}.x/linux-${LINUX}.tar.xz
     fi
 
     if [[ -z ${TARBALLS} ]]; then
@@ -458,48 +444,48 @@ function download_sources() {
     else
         if [[ ! -f ${MPFR_tar}.tar.xz ]]; then
             header "DOWNLOADING MPFR"
-            axel https://www.mpfr.org/mpfr-current/${MPFR_tar}.tar.xz
+            ${DOWNLOADER} https://www.mpfr.org/mpfr-current/${MPFR_tar}.tar.xz
         fi
 
         if [[ ! -f ${MPC_tar}.tar.gz ]]; then
             header "DOWNLOADING MPC"
-            axel https://ftp.gnu.org/gnu/mpc/${MPC_tar}.tar.gz
+            ${DOWNLOADER} https://ftp.gnu.org/gnu/mpc/${MPC_tar}.tar.gz
         fi
 
         if [[ ! -f ${GLIBC_tar}.tar.xz ]]; then
             header "DOWNLOADING GLIBC ${GLIBC_tar} FOR GCC ${VERSION}"
-            axel https://ftp.gnu.org/gnu/glibc/${GLIBC_tar}.tar.xz
+            ${DOWNLOADER} https://ftp.gnu.org/gnu/glibc/${GLIBC_tar}.tar.xz
         fi
 
         if [[ ! -f binutils-${BINUTILS_tar}.tar.xz ]]; then
             header "DOWNLOADING BINUTILS ${BINUTILS_tar} FOR GCC ${VERSION}"
-            axel https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_tar}.tar.xz
+            ${DOWNLOADER} https://ftp.gnu.org/gnu/binutils/binutils-${BINUTILS_tar}.tar.xz
         fi
 
         if [[ ! -f ${ISL_tar}.tar.xz ]]; then
             header "DOWNLOADING ISL ${ISL_tar} FOR GCC ${VERSION}"
-            axel http://isl.gforge.inria.fr/${ISL_tar}.tar.xz
+            ${DOWNLOADER} http://isl.gforge.inria.fr/${ISL_tar}.tar.xz
         fi
 
         # GNU, any version
         if [[ ${SOURCE} = "gnu" ]]; then
             if [[ ! -f ${GCC}.tar.${EXT:-xz} ]]; then
                 header "DOWNLOADING GCC"
-                axel https://mirrors.kernel.org/gnu/gcc/${GCC}/${GCC}.tar.${EXT:-xz}
+                ${DOWNLOADER} https://mirrors.kernel.org/gnu/gcc/${GCC}/${GCC}.tar.${EXT:-xz}
             fi
             GCC_TAR=${GCC}.tar.${EXT:-xz}
         # Linaro, 8.x and newer
         elif [[ ${VERSION} -ge 8 ]]; then
             if [[ ! -f gcc-arm-src-snapshot-${GCC}.tar.xz ]]; then
                 header "DOWNLOADING GCC"
-                axel https://developer.arm.com/-/media/Files/downloads/gnu-a/${GCC}/srcrel/gcc-arm-src-snapshot-${GCC}.tar.xz
+                ${DOWNLOADER} https://developer.arm.com/-/media/Files/downloads/gnu-a/${GCC}/srcrel/gcc-arm-src-snapshot-${GCC}.tar.xz
             fi
             GCC_TAR=gcc-arm-src-snapshot-${GCC}.tar.xz
         # Linaro, 7.x and older
         else
             if [[ ! -f gcc-${GCC}.tar.gz ]]; then
                 header "DOWNLOADING GCC"
-                axel https://git.linaro.org/toolchain/gcc.git/snapshot/gcc-${GCC}.tar.gz
+                ${DOWNLOADER} https://git.linaro.org/toolchain/gcc.git/snapshot/gcc-${GCC}.tar.gz
             fi
             GCC_TAR=gcc-${GCC}.tar.gz
         fi
