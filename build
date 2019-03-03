@@ -414,7 +414,7 @@ function download_sources() {
     if [[ -z ${TARBALLS} ]]; then
         if [[ ! -d mpfr ]]; then
             header "DOWNLOADING MPFR"
-            svn co svn://scm.gforge.inria.fr/svnroot/mpfr/${MPFR_svn} mpfr
+            svn co -q svn://scm.gforge.inria.fr/svnroot/mpfr/${MPFR_svn} mpfr
         fi
 
         if [[ ! -d mpc ]]; then
