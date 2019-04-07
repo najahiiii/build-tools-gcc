@@ -183,7 +183,7 @@ function setup_variables() {
     CONFIGURATION=( "--disable-multilib" "--disable-werror"
                     "CFLAGS=-g0 -O2 -fstack-protector-strong"
                     "CXXFLAGS=-g0 -O2 -fstack-protector-strong" )
-    JOBS="-j$(($(nproc --all) + 1))"
+    JOBS="-j$(($(nproc --all) + 4))"
 
     # Binary versions
     BINUTILS_git="master"
@@ -194,7 +194,7 @@ function setup_variables() {
     MPC_git="master"
     MPC_tar="mpc-1.1.0"
     ISL_git="master"
-    ISL_tar="isl-0.20"
+    ISL_tar="isl-0.21"
     GLIBC_git="master"
     GLIBC_tar="glibc-2.29"
     LINUX="5.0"
@@ -660,8 +660,8 @@ function build_binutils() {
                           --disable-gdb \
                           --enable-gold \
                           "${CONFIGURATION[@]}"
-    make ${JOBS} || die "Error while building binutils!" -n
-    make install ${JOBS} || die "Error while installing binutils!" -n
+    travis_wait 50 make ${JOBS} -s || die "Error while building binutils!" -n
+    travis_wait 50 make install ${JOBS} -s || die "Error while installing binutils!" -n
 }
 
 
@@ -669,9 +669,9 @@ function build_binutils() {
 function build_headers() {
     header "MAKING LINUX HEADERS"
     cd ../linux || die "Linux kernel folder does not exist!"
-    make ARCH="${KERNEL_ARCH}" \
+    travis_wait 50 make ARCH="${KERNEL_ARCH}" \
         INSTALL_HDR_PATH="${INSTALL}/${TARGET}" \
-        headers_install ${JOBS} || die "Error while building/installing Linux headers!" -n
+        headers_install ${JOBS} -s || die "Error while building/installing Linux headers!" -n
 }
 
 
@@ -683,11 +683,11 @@ function build_gcc() {
                      --target=${TARGET} \
                      --prefix="${INSTALL}" \
                      "${CONFIGURATION[@]}"
-    make all-gcc ${JOBS} || die "Error while building gcc!" -n
-    make install-gcc ${JOBS} || die "Error while installing gcc!" -n
+    travis_wait 50 make all-gcc ${JOBS} -s || die "Error while building gcc!" -n
+    travis_wait 50 make install-gcc ${JOBS} -s || die "Error while installing gcc!" -n
     if [[ ${ARCH} = "x86_64" ]]; then
-        make all-target-libgcc ${JOBS} || die "Error while installing libgcc for host!" -n
-        make install-target-libgcc ${JOBS} || die "Error while installing libgcc for target!" -n
+        travis_wait 50 make all-target-libgcc ${JOBS} -s || die "Error while installing libgcc for host!" -n
+        travis_wait 50 make install-target-libgcc ${JOBS} -s || die "Error while installing libgcc for target!" -n
     fi
 }
 
@@ -704,22 +704,22 @@ function build_glibc() {
                           --target=${TARGET} \
                           --with-headers="${INSTALL}/${TARGET}/include" \
                           "${CONFIGURATION[@]}" libc_cv_forced_unwind=yes
-    make install-bootstrap-headers=yes install-headers ${JOBS} || die "Error installing headers for glibc!" -n
-    make csu/subdir_lib ${JOBS} || die "Error while making subdir_lib for glibc!" -n
+    travis_wait 50 make install-bootstrap-headers=yes install-headers ${JOBS} -s || die "Error installing headers for glibc!" -n
+    travis_wait 50 make csu/subdir_lib ${JOBS} -s || die "Error while making subdir_lib for glibc!" -n
     install csu/crt1.o csu/crti.o csu/crtn.o "${INSTALL}/${TARGET}/lib"
     ${TARGET}-gcc -nostdlib -nostartfiles -shared -x c /dev/null -o "${INSTALL}/${TARGET}/lib/libc.so"
     touch "${INSTALL}/${TARGET}/include/gnu/stubs.h"
     if [[ ${ARCH} = "x86_64" ]]; then
-        make ${JOBS} || die "Error while building glibc for the host!" -n
-        make install ${JOBS} || die "Error while installing glibc for the host!" -n
+        travis_wait 50 make ${JOBS} -s || die "Error while building glibc for the host!" -n
+        travis_wait 50 make install ${JOBS} -s || die "Error while installing glibc for the host!" -n
     else
         cd ../build-gcc || die "GCC build folder does not exist!"
-        make all-target-libgcc ${JOBS} || die "Error while building libgcc for target!" -n
-        make install-target-libgcc ${JOBS} || die "Error while installing libgcc for target!" -n
+        travis_wait 50 make all-target-libgcc ${JOBS} -s || die "Error while building libgcc for target!" -n
+        travis_wait 50 make install-target-libgcc ${JOBS} -s || die "Error while installing libgcc for target!" -n
 
         cd ../build-glibc || die "glibc build folder does not exist!"
-        make ${JOBS} || die "Error while building glibc for target" -n
-        make install ${JOBS} || die "Error while installing glibc for target" -n
+        travis_wait 50 make ${JOBS} -s || die "Error while building glibc for target" -n
+        travis_wait 50 make install ${JOBS} -s || die "Error while installing glibc for target" -n
     fi
 }
 
@@ -728,8 +728,8 @@ function build_glibc() {
 function install_gcc() {
     header "INSTALLING GCC"
     cd ../build-gcc || die "GCC build folder does not exist!"
-    make all ${JOBS} || die "Error while compiling final toolchain!" -n
-    make install ${JOBS} || die "Error while installing final toolchain!" -n
+    travis_wait 50 make all ${JOBS} -s || die "Error while compiling final toolchain!" -n
+    travis_wait 50 make install ${JOBS} -s || die "Error while installing final toolchain!" -n
     cd ..
 }
 

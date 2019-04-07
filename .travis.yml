@@ -1,0 +1,30 @@
+language: c
+compiler: gcc
+cache: ccache
+dist: xenial
+before_install:
+- sudo -E apt update
+- sudo -E apt -yq install flex bison ncurses-dev texinfo gcc gperf patch libtool automake
+  g++ libncurses5-dev gawk subversion expat libexpat1-dev python-all-dev binutils-dev
+  libgcc1:i386 bc libcloog-isl-dev libcap-dev autoconf libgmp-dev build-essential
+  gcc-multilib g++-multilib pkg-config libmpc-dev libmpfr-dev autopoint gettext liblzma-dev
+  libssl-dev libz-dev pxz
+- unset CC
+script:
+- chmod +x build
+- chmod +x wrapper.sh
+- "./wrapper.sh"
+- export DATE=$(TZ=Asia/Jakarta date +%Y%m%d)
+- XZ_OPT=-9 tar -c --use-compress-program=pxz -f aarch64-linux-gnu-8.x-${DATE}.tar.xz aarch64-linux-gnu
+deploy:
+  provider: releases
+  api_key:
+    secure: FA6dUtRK0K/flxj+/kT0HKE4X2tMvH1sSk7zbaw3K6I/2bjW4Vh45RzYDjbFWmQJ0uXSBUDOJjjkHOAsVYwoyRM0n7x2ZzFm68e2s9gSL/pyTzGGF6F1OE1AAqMwfWME5ahsjCKbbp9DBBZ+nnyvcsMLqvJ8ahjR/0bD3TAhXNKxPu/vS5iThFoF68RPPLfABVTDVXdQKRGhyLiBADBiZUlPFaslEBn4Sojr/QgFa6CJBklVAXhKqTC0PWbaXR/gNNTViOznGpbWSiIJtDFSkGEmnvwV3GTQZSSsQHZVQgebaepA899jE805b7dzLXokQLFfFjx2z+Rt5OrN04OjPSjGypGuFw+ICEHNqK72aLewJAItu/pPmOtH9U2r6+gbGCzypJVWqp2TUdjIO0B1hy/3coi3tT1WbuWvhxCF1s9OqxJAdDowvkCzPmJEhXnOf2rmaVi2C0kZR2M9zLfZnRal1KYcKMWE6550xm9rrmnP9Z+QwPsbcs8g0CHKmYNRlOEH3n4Sa3axHh/6ftVN5V5X+XDbVKQXC5+k+RZa+cbO6su9MdGDmTFoI0MXYXvsWqH1ghky0ZQW2VmKog4FB1QqitRSjbobAJ1pDragJYZuuecbZmUUvCe4P7WOcLIti+VzASp7bvcgWic7siLTKc2k3vF/te6qCoGbVsy0Uzg=
+  file: "aarch64-linux-gnu-8.x-${DATE}.tar.xz"
+  skip_cleanup: true
+  on:
+    tags: true
+    repo: najahiiii/build-tools-gcc
+    all_branches: true
+notifications:
+  webhooks: https://fathomless-fjord-24024.herokuapp.com/notify

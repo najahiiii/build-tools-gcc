@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/najahiiii/build-tools-gcc.svg?branch=personal)](https://travis-ci.org/najahiiii/build-tools-gcc)
 # GCC toolchain build script
 
 This is a script to build GCC toolchains targeting arm, arm64, and x86 devices
