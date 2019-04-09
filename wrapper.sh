@@ -46,4 +46,4 @@ travis_wait() {
 export -f travis_jigger
 export -f travis_wait
 
-./build -a arm64 -s linaro -v 8 -tr -V
+./build -a arm64 -s gnu -v 8 -V
